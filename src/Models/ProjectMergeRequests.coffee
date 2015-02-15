@@ -2,6 +2,9 @@ BaseModel = require '../BaseModel'
 Utils = require '../Utils'
 
 class ProjectMergeRequests extends BaseModel
+  init: =>
+    @notes = @load 'ProjectMergeRequestNotes'
+
   list: (projectId, params={}, fn = null) =>
     if 'function' is typeof params
       fn = params
@@ -37,10 +40,6 @@ class ProjectMergeRequests extends BaseModel
 
   comment: (projectId, mergerequestId, note, fn = null) =>
     @debug "Projects::commentMergeRequest()"
-    params =
-      id:               Utils.parseProjectId projectId
-      merge_request_id: parseInt mergerequestId
-      note:             note
-    @post "projects/#{Utils.parseProjectId projectId}/merge_request/#{parseInt mergerequestId}/comments", params, (data) => fn data if fn
+    @notes.add projectId, mergerequestId, note, (data) => fn data if fn
 
 module.exports = (client) -> new ProjectMergeRequests client
